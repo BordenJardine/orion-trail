@@ -1,3 +1,4 @@
+var TO_RADIANS = Math.PI/180;
 var ctxOffset = {
 	'x' : 0,
 	'y' : 0
@@ -108,26 +109,43 @@ function generateEntities(){
 		'player' : new entity({
 			'x' : 0,
 			'y' : 0,
+			'angle' : 0,
+			'h' : 11,
+			'w' : 11,
+			'halfH' : 6,
+			'halfW' : 6,
 			'color' : 'red',
 			'sprite' : new Image(),
 			'spriteSrc' : 'images/red-arrow.gif',
+			'speed' : 2,
+			'handling' : 2,
 			'draw' : function(ctx){
+				ctx.save();
+				ctx.translate(this.x, this.y);
+				ctx.rotate(this.angle * TO_RADIANS);
+				ctx.translate(-this.x, -this.y);
 				ctx.drawImage(this.sprite, this.x - this.halfW, this.y - this.halfH);
+				ctx.restore();
 			},
 			'init' : function(ctx){
 				this.sprite.src = this.spriteSrc;
-				var ga = ctx.globalAlpha;
-				//ctx.globalAlpha = 1;
-				ctx.drawImage(this.sprite, 0, 0);
-				//ctx.globalAlpha = ga;
-				this.h = this.sprite.height;
-				this.w = this.sprite.width;
-				this.halfH = this.h/2;
-				this.halfW = this.w/2;
-				alert(this.h);
+			},
+			'goForth' : function(){this.y -= this.speed },
+			'goBack' : function(){this.y += this.speed },
+			'rotateLeft' : function(){
+				this.angle -= this.handling;
+				if (this.angle < 0){
+					this.angle += 360;	
+				}
+			},
+			'rotateRight' : function(){
+				this.angle += this.handling;
+				if (this.angle >= 360){
+					this.angle -= 360;	
+				}
 			}
 		}),
-		'origin' : new entity({'x' : 0, 'y' : 0, 'color' : 'black', 'h' : 11, 'w': 11, 'halfH' : 5, 'halfW' : 5}),
+		'origin' : new entity({'x' : 0, 'y' : 0, 'color' : 'black', 'h' : 2, 'w': 2, 'halfH' : 1, 'halfW' : 1}),
 		's1' : new entity({'x' : 50, 'y' : 50}),
 		's2' : new entity({'x' : 15, 'y' : 22}),
 		's3' : new entity({'x' : -150, 'y' : 180}),
@@ -172,9 +190,9 @@ function handleKeys(keyPresses){
 
 		if (value == 1){
 			if (key == 37) {
-				player.x--;
+				player.rotateLeft();
 			} else if (key == 39) {
-				player.x++;
+				player.rotateRight();
 			}
 			if (key == 38) {
 				player.y--;
