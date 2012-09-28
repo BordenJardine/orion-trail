@@ -1,8 +1,12 @@
 var TO_RADIANS = Math.PI/180;
+var FRAME_RATE = 30;
+var $can;
+var	ctx;
+var	canDimensions;
 var ctxOffset = {
 	'x' : 0,
 	'y' : 0
-}
+};
 var entities = generateEntities();
 var keyPresses = {
 	current : {},
@@ -25,8 +29,22 @@ var viewport = {
 	'b' : 0
 };
 
-function clearViewport(ctx, viewport){
+
+var lastUpdate = Date.now();
+function animationLoop() {
+	var now = Date.now(); 
+	var elapsedMils = now - lastUpdate; 
+	if(elapsedMils>=(1000/FRAME_RATE)) {
+		tick(); 
+		lastUpdate = now; 		
+	}
+	requestAnimationFrame(animationLoop);
+}
+
+
+function clearViewport(){
 	ctx.clearRect(viewport.l+viewport.margin, viewport.t+viewport.margin, viewport.w-viewport.marginTwice, viewport.h-viewport.marginTwice);
+	return 0;
 }
 
 
@@ -40,58 +58,63 @@ function cloneObj(obj) {
 }
 
 
-function drawDispatch(ctx, ctxOffset, entities, viewport) {
+function drawDispatch() {
 	ctx.save();
 	ctx.translate(ctxOffset.x, ctxOffset.y);
 
-	clearViewport(ctx, viewport);
-	drawViewport(ctx, viewport);
+	clearViewport();
+	drawViewport();
 
 	var drawMe = 0;
 	$.each(entities, function(id, entityToDraw){
-		if (intBetween(entityToDraw.x, viewport.l, viewport.r) && intBetween(entityToDraw.y, viewport.t, viewport.b)){
+		if (intBetween(entityToDraw.pos.x, viewport.l, viewport.r) && intBetween(entityToDraw.pos.y, viewport.t, viewport.b)){
 			drawMe = 1;
-			entityToDraw.draw(ctx);
+			entityToDraw.draw();
 		} else {
 			drawMe = 0;
 		}
 		var $context = $('#'+id, $('table#entities'));
-		$('#x', $context).html(entityToDraw.x);
-		$('#y', $context).html(entityToDraw.y);
+		$('#x', $context).html(entityToDraw.pos.x);
+		$('#y', $context).html(entityToDraw.pos.y);
 		$('#d', $context).html(drawMe);
 	});
 
 	ctx.restore();
 
-	return false;
+	return 0;
 }
 
 
-function drawViewport(ctx, viewport){
-		ctx.strokeStyle = "red";
-		ctx.strokeRect(viewport.l, viewport.t, viewport.w, viewport.h);
+function drawViewport(){
+	ctx.strokeStyle = "red";
+	ctx.strokeRect(viewport.l, viewport.t, viewport.w, viewport.h);
+		
+	return 0;
 }
 
 
 function entity(attributes){
-	this.x = 0;
-	this.y = 0;
+	this.pos = new Vector2(0,0);
 	this.h = 8;
 	this.w = 8;
 	this.halfH = 4;
 	this.halfW = 4;
 	this.color = 'lightblue';
-	this.draw = function(ctx){
+	this.draw = function(){
 		ctx.fillStyle = this.color;
-		ctx.fillRect(this.x - this.halfW, this.y - this.halfH, this.w, this.h);
+		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
 
 		ctx.fillStyle = 'black'; // just to show where we are drawing these things
-		ctx.fillText(this.x + ', ' + this.y, this.x, this.y);
+		ctx.fillText(this.pos.x + ', ' + this.pos.y, this.pos.x, this.pos.y);
 	};
 
 	for (var key in attributes){
 		this[key] = attributes[key];
 	}
+	
+	if (typeof this.init == 'function') {this.init()};
+	
+	return 0;
 };
 
 
@@ -104,12 +127,16 @@ function extendObj(target, extender){
 }
 
 
+function fastRound(num){
+	return ~~ (num + (num > 0 ? .5 : -.5));
+}
+
+
 function generateEntities(){
 	return {
 		'player' : new entity({
-			'x' : 0,
-			'y' : 0,
 			'angle' : 0,
+			'vel' : new Vector2(0,0),
 			'h' : 11,
 			'w' : 11,
 			'halfH' : 6,
@@ -117,47 +144,63 @@ function generateEntities(){
 			'color' : 'red',
 			'sprite' : new Image(),
 			'spriteSrc' : 'images/red-arrow.gif',
-			'speed' : 2,
-			'handling' : 2,
-			'draw' : function(ctx){
+			'accel' : 1,
+			'braking' : .5,
+			'handling' : 5,
+			'goingForth' : 0,
+			'goingBack' : 0,
+			'rotatingLeft' : 0,
+			'rotatingRight' : 0,
+			'draw' : function(){
+				var x = this.pos.x //= fastRound(this.pos.x);
+				var y = this.pos.y //= fastRound(this.pos.y);
 				ctx.save();
-				ctx.translate(this.x, this.y);
+				ctx.translate(x, y);
 				ctx.rotate(this.angle * TO_RADIANS);
-				ctx.translate(-this.x, -this.y);
-				ctx.drawImage(this.sprite, this.x - this.halfW, this.y - this.halfH);
+				ctx.translate(-x, -y);
+				ctx.drawImage(this.sprite, x - this.halfW, y - this.halfH);
 				ctx.restore();
 			},
-			'init' : function(ctx){
+			'init' : function(){
 				this.sprite.src = this.spriteSrc;
 			},
-			'goForth' : function(){this.y -= this.speed },
-			'goBack' : function(){this.y += this.speed },
-			'rotateLeft' : function(){
-				this.angle -= this.handling;
-				if (this.angle < 0){
-					this.angle += 360;	
+			'update' : function() {
+				player.vel.multiplyEq(0.99);
+				var rads = this.angle * TO_RADIANS;
+				if(player.goingForth == true) {
+					this.vel.x+= Math.sin(rads) * this.accel;
+					this.vel.y-= Math.cos(rads) * this.accel;
+				} else if(player.goingBack == true) {
+					this.vel.x-= Math.sin(rads) * this.braking;
+					this.vel.y+= Math.cos(rads) * this.braking;
 				}
-			},
-			'rotateRight' : function(){
-				this.angle += this.handling;
-				if (this.angle >= 360){
-					this.angle -= 360;	
-				}
+				if(player.rotatingLeft == true) {
+					this.angle -= this.handling;
+					if (this.angle < 0){
+						this.angle += 360;	
+					}
+				} else if(player.rotatingRight == true) {
+					this.angle += this.handling;
+						if (this.angle >= 360){
+						this.angle -= 360;	
+					}
+				}			
+				this.pos.plusEq(this.vel);
 			}
 		}),
-		'origin' : new entity({'x' : 0, 'y' : 0, 'color' : 'black', 'h' : 2, 'w': 2, 'halfH' : 1, 'halfW' : 1}),
-		's1' : new entity({'x' : 50, 'y' : 50}),
-		's2' : new entity({'x' : 15, 'y' : 22}),
-		's3' : new entity({'x' : -150, 'y' : 180}),
-		's4' : new entity({'x' : 620, 'y' : 580}),
-		's5' : new entity({'x' : 570, 'y' : 80}),
-		's6' : new entity({'x' : -400, 'y' : 100}),
-		's7' : new entity({'x' : 170, 'y' : -45}),
-		's8' : new entity({'x' : 130, 'y' : 370}),
-		's9' : new entity({'x' : 330, 'y' : 470}),
-		's10' : new entity({'x' : 230, 'y' : 570}),
-		's11' : new entity({'x' : -30, 'y' : -70}),
-		's12' : new entity({'x' : 650, 'y' : 57})
+		'origin' : new entity({'color' : 'black', 'h' : 2, 'w': 2, 'halfH' : 1, 'halfW' : 1}),
+		's1' : new entity({'pos' : new Vector2(50,50)}),
+		's2' : new entity({'pos' : new Vector2(15,22)}),
+		's3' : new entity({'pos' : new Vector2(-150,180)}),
+		's4' : new entity({'pos' : new Vector2(620,580)}),
+		's5' : new entity({'pos' : new Vector2(570,80)}),
+		's6' : new entity({'pos' : new Vector2(-400,100)}),
+		's7' : new entity({'pos' : new Vector2(170,-45)}),
+		's8' : new entity({'pos' : new Vector2(130,370)}),
+		's9' : new entity({'pos' : new Vector2(330,470)}),
+		's10' : new entity({'pos' : new Vector2(230,570)}),
+		's11' : new entity({'pos' : new Vector2(-30,-70)}),
+		's12' : new entity({'pos' : new Vector2(650,57)})
 	};
 }
 
@@ -172,44 +215,34 @@ function getCanvasDimensions($can){
 }
 
 
-function handleKeys(keyPresses){
-	var $table = $('table#keys');
-	var currentKeyTR = undefined;
+function handleKeys(){
 	$.each(keyPresses.current, function(key, value){
-		//debug table
-		$currentKeyTR = $('tr#'+key, $table);
-		if ($currentKeyTR.length == 0){
-			$currentKeyTR = $(document.createElement('tr')).attr('id', key);
-			$currentKeyTR.append(
-				$(document.createElement('td')).attr('id', key+'Key').html(key),
-				$(document.createElement('td')).attr('id', key+'Value')
-			);
-			$table.append($currentKeyTR);
+		if(key == 37) {
+			player.rotatingLeft = value;
+		} else if (key == 39) {
+			player.rotatingRight = value;
+		}else if(key == 38) {
+			player.goingForth = value;
+		} else if (key == 40) {
+			player.goingBack = value;
+		} else if(key == 116) {
+			window.location.reload();
 		}
-		$('#'+key+'Value', $currentKeyTR).html(value);
 
-		if (value == 1){
-			if (key == 37) {
-				player.rotateLeft();
-			} else if (key == 39) {
-				player.rotateRight();
-			}
-			if (key == 38) {
-				player.y--;
-			} else if (key == 40) {
-				player.y++;
-			}
-		}
 	});
+	
+	return 0;
 }
 
 
-function initEntities(ctx, entities){
-	$.each(entities, function(key, value){
-		if (entities[key].init != undefined){
-			entities[key].init(ctx);
+function initEntities(){
+	$.each(entities, function(key, entity){
+		if (entity.init != undefined){
+			entity.init();
 		}
 	});
+	
+	return 0;
 }
 
 
@@ -228,11 +261,6 @@ function initEntitiesTable($table){
 }
 
 
-function initKeysTable($table){
-	$table.html("<tr><th>Key</th><th>On?</th>");
-}
-
-
 function intBetween(n, x, y){
 	return (n >= x && n  <= y);
 }
@@ -247,23 +275,26 @@ function prettyPrintObj(obj){
 }
 
 
-function tick(canDimensions, ctx, ctxOffset, entities, keyPresses, viewport){
-	handleKeys(keyPresses);
-	ctxOffset = translateCtxOffset(ctxOffset, canDimensions, player);
-	viewport = translateViewport(viewport, canDimensions, ctxOffset);
-	drawDispatch(ctx, ctxOffset, entities, viewport);
+function tick(){
+	handleKeys();
+	updateEntities();
+	ctxOffset = translateCtxOffset(player.pos);
+	viewport = translateViewport();
+	drawDispatch();
+	
+	return 0;
 }
 
 
-function translateCtxOffset(ctxOffset, canDimensions, player){
-	ctxOffset.x = -player.x + canDimensions.halfW;
-	ctxOffset.y = -player.y + canDimensions.halfH;
+function translateCtxOffset(newOriginVector){
+	ctxOffset.x = -newOriginVector.x + canDimensions.halfW;
+	ctxOffset.y = -newOriginVector.y + canDimensions.halfH;
 
 	return ctxOffset;
 }
 
 
-function translateViewport(viewport, canDimensions, ctxOffset){
+function translateViewport(){
 	viewport.l = -ctxOffset.x - viewport.margin;
 	viewport.t = -ctxOffset.y - viewport.margin;
 	viewport.w = canDimensions.w + viewport.marginTwice;
@@ -275,32 +306,27 @@ function translateViewport(viewport, canDimensions, ctxOffset){
 }
 
 
+function updateEntities(){
+	$.each(entities, function(key, entity){
+		if(entity.update != undefined && typeof entity.update == 'function') {entity.update();}
+	});
+	
+	return 0;
+}
+
+
 $(function(){
-	var $can = $('#canvas1');
-	var $coords = $('#coords');
-	var ctx = $can[0].getContext('2d');
-	var canDimensions =  getCanvasDimensions($can);
-	$can.attr('tabindex', 1); // quick way to get focus so keyPresses register
+	$can = $('#canvas1');
+	ctx = $can[0].getContext('2d');
+	canDimensions = getCanvasDimensions($can);
+	$can.attr('tabindex', 1);
 	ctx.font = '8px sans';
 
-	//debug tables
 	$entitiesTable = $('#entities', $('#right'));
-	$keysTable = $('#keys', $('#right'));
 	initEntitiesTable($entitiesTable);
-	initKeysTable($keysTable);
 
-	initEntities(ctx, entities);
-
-	$can.keydown(function(e) {
-		keyPresses.press(e);
-		tick(canDimensions, ctx, ctxOffset, entities, keyPresses, viewport);
-	});
-	$can.keyup(function(e) {
-		keyPresses.release(e);
-		tick(canDimensions, ctx, ctxOffset, entities, keyPresses, viewport);
-	});
-
+	$can.keydown(function(e) {e.preventDefault(); keyPresses.press(e)});
+	$can.keyup(function(e) {e.preventDefault(); keyPresses.release(e)});
 	$can.focus();
-	tick(canDimensions, ctx, ctxOffset, entities, keyPresses, viewport);
+	animationLoop();
 });
-
