@@ -1,5 +1,5 @@
 var TO_RADIANS = Math.PI/180;
-var FRAME_RATE = 30;
+var FRAME_RATE = 60;
 var $can;
 var	ctx;
 var	canDimensions;
@@ -32,24 +32,25 @@ var viewport = {
 
 var lastUpdate = Date.now();
 function animationLoop() {
-	var now = Date.now(); 
-	var elapsedMils = now - lastUpdate; 
+	var now = Date.now();
+	var elapsedMils = now - lastUpdate;
 	if(elapsedMils>=(1000/FRAME_RATE)) {
-		tick(); 
-		lastUpdate = now; 		
+		tick();
+		lastUpdate = now;
 	}
 	requestAnimationFrame(animationLoop);
 }
 
 
 function clearViewport(){
-	ctx.clearRect(viewport.l+viewport.margin, viewport.t+viewport.margin, viewport.w-viewport.marginTwice, viewport.h-viewport.marginTwice);
+	ctx.fillStyle='rgba(0,0,0,0.2)';
+	ctx.fillRect(viewport.l+viewport.margin, viewport.t+viewport.margin, viewport.w-viewport.marginTwice, viewport.h-viewport.marginTwice);
 	return 0;
 }
 
 
 function cloneObj(obj) {
-	if (null == obj || "object" != typeof obj) return obj;
+	if (null == obj || 'object' != typeof obj) return obj;
 	var copy = obj.constructor();
 	for (var attr in obj) {
 		if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
@@ -88,7 +89,7 @@ function drawDispatch() {
 function drawViewport(){
 	ctx.strokeStyle = "red";
 	ctx.strokeRect(viewport.l, viewport.t, viewport.w, viewport.h);
-		
+
 	return 0;
 }
 
@@ -104,16 +105,16 @@ function entity(attributes){
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
 
-		ctx.fillStyle = 'black'; // just to show where we are drawing these things
+		ctx.fillStyle = 'white'; // just to show where we are drawing these things
 		ctx.fillText(this.pos.x + ', ' + this.pos.y, this.pos.x, this.pos.y);
 	};
 
 	for (var key in attributes){
 		this[key] = attributes[key];
 	}
-	
+
 	if (typeof this.init == 'function') {this.init()};
-	
+
 	return 0;
 };
 
@@ -177,14 +178,14 @@ function generateEntities(){
 				if(player.rotatingLeft == true) {
 					this.angle -= this.handling;
 					if (this.angle < 0){
-						this.angle += 360;	
+						this.angle += 360;
 					}
 				} else if(player.rotatingRight == true) {
 					this.angle += this.handling;
 						if (this.angle >= 360){
-						this.angle -= 360;	
+						this.angle -= 360;
 					}
-				}			
+				}
 				this.pos.plusEq(this.vel);
 			}
 		}),
@@ -230,7 +231,7 @@ function handleKeys(){
 		}
 
 	});
-	
+
 	return 0;
 }
 
@@ -241,7 +242,7 @@ function initEntities(){
 			entity.init();
 		}
 	});
-	
+
 	return 0;
 }
 
@@ -281,7 +282,7 @@ function tick(){
 	ctxOffset = translateCtxOffset(player.pos);
 	viewport = translateViewport();
 	drawDispatch();
-	
+
 	return 0;
 }
 
@@ -310,13 +311,16 @@ function updateEntities(){
 	$.each(entities, function(key, entity){
 		if(entity.update != undefined && typeof entity.update == 'function') {entity.update();}
 	});
-	
+
 	return 0;
 }
 
 
 $(function(){
 	$can = $('#canvas1');
+	$window = $('window');
+	$can.width($window.width());
+	$can.height($window.height());
 	ctx = $can[0].getContext('2d');
 	canDimensions = getCanvasDimensions($can);
 	$can.attr('tabindex', 1);
