@@ -10,62 +10,32 @@ var keyPresses = {
 
 
 function handleKeys() {
-	$.each(keyPresses.current, function(key, value){
+	for(var key in keyPresses.current) {
+		if(!keyPresses.current.hasOwnProperty(key)) {continue};
 		switch(parseInt(key)){
 			case 37:
-				player.rotatingLeft = value;
+				player.rotatingLeft = keyPresses.current[key];
 				break;
 			case 39:
-				player.rotatingRight = value;
+				player.rotatingRight = keyPresses.current[key];
 				break;
 			case 38:
-				player.goingForth = value;
+				player.goingForth = keyPresses.current[key];
 				break;
 			case 40:
-				player.goingBack = value;
+				player.goingBack = keyPresses.current[key];
 				break;
 			case 107:
-				if(value == 1) viewport.zoomIn();
+				if(keyPresses.current[key] == 1) viewport.zoomIn();
 				break;
 			case 109:
-				if(value == 1) viewport.zoomOut();
+				if(keyPresses.current[key] == 1) viewport.zoomOut();
 				break;
 			case 116:
-				if(value == 1) window.location.reload();
+				if(keyPresses.current[key] == 1) window.location.reload();
 				break;
 		}
-	});
-
-	return 0;
-}
-
-function handleKeys() {
-	$.each(keyPresses.current, function(key, value){
-		switch(parseInt(key)){
-			case 37:
-				player.rotatingLeft = value;
-				break;
-			case 39:
-				player.rotatingRight = value;
-				break;
-			case 38:
-				player.goingForth = value;
-				break;
-			case 40:
-				player.goingBack = value;
-				break;
-			case 107:
-				if(value == 1) viewport.zoomIn();
-				break;
-			case 109:
-				if(value == 1) viewport.zoomOut();
-				break;
-			case 116:
-				if(value == 1) window.location.reload();
-				break;
-		}
-	});
-
+	}
 
 	return 0;
 }

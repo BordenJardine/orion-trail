@@ -27,7 +27,6 @@ var Entity = function(attr){
 
 	if(attr != undefined) {
 		for(var key in attr) {
-			//alert(key + " " + attr.hasOwnProperty(key));
 			if(attr.hasOwnProperty(key)){
 				this[key] = attr[key];
 			}

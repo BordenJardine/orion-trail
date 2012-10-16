@@ -1,7 +1,6 @@
 var TO_RADIANS = Math.PI / 180;
-var FRAME_RATE = 30;
+var FRAME_RATE = 60;
 var ONE_SECOND = 1000;
-var $can;
 var entities;
 var player;
 var viewport;
@@ -23,7 +22,7 @@ function animationLoop() {
 	if(elapsedMils >= ONE_SECOND) {
 		fps = framecounter;
 		framecounter = 0;
-		lastFPSDraw = Date.now();
+		lastFPSDraw = now;
 	}
 	requestAnimationFrame(animationLoop);
 }
@@ -55,8 +54,7 @@ var drawDispatch = function() {
 };
 
 
-function resizeCanvas($can) {
-	var can = $can[0];
+function resizeCanvas(can) {
 	if(can.width != can.clientWidth) {
 		can.width = can.clientWidth;
 	}
@@ -67,7 +65,7 @@ function resizeCanvas($can) {
 
 
 function tick() {	
-	resizeCanvas(viewport.$can);
+	resizeCanvas(viewport.can);
 	handleKeys();
 	updateEntities();
 	viewport.translateCtxOffset(player.pos);
@@ -78,9 +76,9 @@ function tick() {
 
 
 function updateEntities() {
-	$.each(entities, function(key, entity) {
-		if(entity.update != undefined && typeof entity.update == 'function') {entity.update();}
-	});
+	for (i = entities.length - 1; i >= 0; i--) {
+		if(entities[i].update != undefined && typeof entities[i].update == 'function') {entities[i].update();}
+	}
 
 	return 0;
 }
@@ -88,14 +86,16 @@ function updateEntities() {
 
 $(function() {
 	var $can = $('#canvas');
-	ctx = $can[0].getContext('2d');
+	var can = $can[0];
+	can.getContext('2d').font = '8px sans';
 	$can.attr('tabindex', 1);
-	ctx.font = '8px sans';
-	viewport = new Viewport($can);
-	$can.keydown(function(e) {e.preventDefault(); keyPresses.press(e);});
-	$can.keyup(function(e) {e.preventDefault(); keyPresses.release(e);});
-        entities = generateEntities();
-        player = entities[0];
+	viewport = new Viewport(can);
+	entities = generateEntities();
+    player = entities[0];
+	
+	can.addEventListener('keydown', function(e) {e.preventDefault(); keyPresses.press(e);});
+	can.addEventListener('keyup', function(e) {e.preventDefault(); keyPresses.release(e);});
+    
 	$can.focus();
 	animationLoop();
 });
