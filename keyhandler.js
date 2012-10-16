@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 var keyPresses = {
 	current : {},
 	press : function(e){
@@ -38,17 +37,7 @@ function handleKeys() {
 	});
 
 	return 0;
-=======
-var keyPresses = {
-	current : {},
-	press : function(e){
-			this.current[e.keyCode] = 1;
-	},
-	release : function(e){
-			this.current[e.keyCode] = 0;
-	}
-};
-
+}
 
 function handleKeys() {
 	$.each(keyPresses.current, function(key, value){
@@ -77,6 +66,6 @@ function handleKeys() {
 		}
 	});
 
+
 	return 0;
->>>>>>> FPS Counter
 }
