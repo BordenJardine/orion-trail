@@ -41,13 +41,16 @@ var newPlayer = function(attr){
 		'name' : 'player',
 		'h' : 11,
 		'w' : 11,
-		'accel' : 1,
-		'braking' : .5,
-		'handling' : 5,
+		'accel' : .25,
+		'braking' : .10,
+		'handling' : .25,
+		'rotationalVel' : 0,
+		'rotationalSpeedLimit' : 5,
 		'goingForth' : 0,
 		'goingBack' : 0,
 		'rotatingLeft' : 0,
 		'rotatingRight' : 0,
+		'speedLimit' : 10,
 		'vectorPath': shipPaths.player,
 		'draw' : function(ctx){
 			ctx.save();
@@ -70,25 +73,35 @@ var newPlayer = function(attr){
 			//this.sprite.src = this.spriteSrc;
 		},
 		'update' : function() {
-			player.vel.multiplyEq(0.99);
+			this.vel.multiplyEq(0.99);
+			this.rotationalVel *= .95;
 			var rads = this.angle * TO_RADIANS;
-			if(player.goingForth == true) {
-				this.vel.x+= Math.sin(rads) * this.accel;
-				this.vel.y-= Math.cos(rads) * this.accel;
-			} else if(player.goingBack == true) {
-				this.vel.x-= Math.sin(rads) * this.braking;
-				this.vel.y+= Math.cos(rads) * this.braking;
+			if(this.goingForth == true) {
+				if(this.vel.isMagLessThan(this.speedLimit)) { 
+					this.vel.x+= Math.sin(rads) * this.accel;
+					this.vel.y-= Math.cos(rads) * this.accel;
+				}
+			} else if(this.goingBack == true) {
+				if(this.vel.isMagLessThan(this.speedLimit)) { 
+					this.vel.x-= Math.sin(rads) * this.braking;
+					this.vel.y+= Math.cos(rads) * this.braking;
+				}
 			}
-			if(player.rotatingLeft == true) {
-				this.angle -= this.handling;
-				if (this.angle < 0){
-					this.angle += 360;
+			if(this.rotatingLeft == true) {
+				if(this.rotationalVel > -this.rotationalSpeedLimit) {
+					this.rotationalVel -= this.handling;
 				}
-			} else if(player.rotatingRight == true) {
-				this.angle += this.handling;
-					if (this.angle >= 360){
-					this.angle -= 360;
-				}
+			} else if(this.rotatingRight == true) {
+				if(this.rotationalVel < this.rotationalSpeedLimit) {
+					this.rotationalVel += this.handling;
+				}					
+			}
+			
+			this.angle += this.rotationalVel;
+			if(this.angle < 0) {
+				this.angle += 360;
+			} else if(this.angle >= 360) {
+				this.angle -= 360;
 			}
 			this.pos.plusEq(this.vel);
 		}

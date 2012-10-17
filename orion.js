@@ -29,7 +29,7 @@ function animationLoop() {
 
 
 var drawDispatch = function() {
-	viewport.clear();
+	viewport.clear(.5);
 	
 	viewport.ctx.fillStyle = 'white';
 	viewport.ctx.fillText('FPS: '+ fps, 5, 10);
