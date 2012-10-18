@@ -68,8 +68,7 @@ function tick() {
 	resizeCanvas(viewport.can);
 	handleKeys();
 	updateEntities();
-	viewport.translateCtxOffset(player.pos);
-	viewport.translate();
+	viewport.translate(player);
 	drawDispatch();
 	return 0;
 }

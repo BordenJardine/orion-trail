@@ -50,7 +50,7 @@ var newPlayer = function(attr){
 		'goingBack' : 0,
 		'rotatingLeft' : 0,
 		'rotatingRight' : 0,
-		'speedLimit' : 12,
+		'speedLimit' : 15,
 		'vectorPath': shipPaths.player,
 		'draw' : function(ctx){
 			ctx.save();
