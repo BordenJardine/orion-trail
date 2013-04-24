@@ -17,6 +17,7 @@ var Drawable = function(attr){
 	this.halfW = 4;
 	this.vel = new Vector2(0,0);
 	this.color = 'lightblue';
+
 	this.draw = function(ctx){
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
@@ -32,6 +33,7 @@ var Drawable = function(attr){
 			}
 		}
 	}
+
 	if(typeof this.init == 'function') this.init()
 };
 
@@ -55,6 +57,7 @@ var Player = function(attr) {
 	this.rotatingRight = 0
 	this.speedLimit = 15
 	this.vectorPath = vectorPaths.player
+
 	this.draw = function(ctx){
 		ctx.save();
 		ctx.translate(this.pos.x, this.pos.y);
@@ -72,10 +75,12 @@ var Player = function(attr) {
 		ctx.translate(-this.pos.x, -this.pos.y);				
 		ctx.restore();
 	};
+
 	this.init = function() {
 		//this.sprite.src = this.spriteSrc;
 		alert('init called');
 	};
+
 	this.update = function() {
 		this.vel.multiplyEq(0.99);
 		this.rotationalVel *= .95;

@@ -1,6 +1,8 @@
 var TO_RADIANS = Math.PI / 180;
 var FRAME_RATE = 60;
 var ONE_SECOND = 1000;
+var can;
+var ctx;
 var entities;
 var player;
 var viewport;
@@ -14,7 +16,7 @@ function animationLoop() {
 	var now = Date.now();
 	var elapsedMils = now - lastUpdate;
 	if(elapsedMils >= (ONE_SECOND / FRAME_RATE)) {
-		tick();
+		tickGame();
 		lastUpdate = now;
 		framecounter++;
 	}
@@ -35,14 +37,15 @@ var drawDispatch = function() {
 	viewport.ctx.fillText('FPS: '+ fps, 5, 10);
 	viewport.ctx.save();
 	
-	viewport.ctx.translate(viewport.ctxOffset.x, viewport.ctxOffset.y);
+	viewport.ctx.translate(viewport.Offset.x, viewport.Offset.y);
 
 	viewport.ctx.scale(viewport.zoom, viewport.zoom);
+	var viewportDimensions = viewport.getDimensions();
 
 	for (i = entities.length - 1; i >= 0; i--) {
 		if (
-			intBetween(entities[i].pos.x * viewport.zoom, viewport.l, viewport.r) &&
-			intBetween(entities[i].pos.y * viewport.zoom, viewport.t, viewport.b)
+			intBetween(entities[i].pos.x * viewport.zoom, viewportDimensions.l, viewportDimensions.r) &&
+			intBetween(entities[i].pos.y * viewport.zoom, viewportDimensions.t, viewportDimensions.b)
 		) {
 			entities[i].draw(viewport.ctx);
 		}
@@ -57,18 +60,21 @@ var drawDispatch = function() {
 function resizeCanvas(can) {
 	if(can.width != can.clientWidth) {
 		can.width = can.clientWidth;
+		viewport.width = can.clientWidth;
 	}
 	if(can.height != can.clientHeight) {
 		can.height = can.clientHeight;
+		viewport.height = can.clientHeight;
 	}
 }
 
 
-function tick() {	
+function tickGame() {	
 	resizeCanvas(viewport.can);
 	handleKeys();
 	updateEntities();
-	viewport.translate(player);
+	viewport.setZoom(player.vel.magnitude() / 25);
+	viewport.centerOn(player.pos);
 	drawDispatch();
 	return 0;
 }
@@ -85,12 +91,13 @@ function updateEntities() {
 
 $(function() {
 	var $can = $('#canvas');
-	var can = $can[0];
-	can.getContext('2d').font = '8px sans';
+	can = $can[0];
+	ctx = can.getContext('2d') 
+	ctx.font = '8px sans';
 	$can.attr('tabindex', 1);
 	viewport = new Viewport(can);
 	entities = generateEntities();
-    player = entities[0];
+	player = entities[0];
 	
 	can.addEventListener('keydown', function(e) {e.preventDefault(); keyPresses.press(e);});
 	can.addEventListener('keyup', function(e) {e.preventDefault(); keyPresses.release(e);});
