@@ -30,16 +30,24 @@ function animationLoop() {
 }
 
 
-var drawDispatch = function() {
-	viewport.clear(.5);
-	
-	viewport.ctx.fillStyle = 'white';
-	viewport.ctx.fillText('FPS: '+ fps, 5, 10);
-	viewport.ctx.save();
-	
-	viewport.ctx.translate(viewport.Offset.x, viewport.Offset.y);
+var clearCanvas = function(alpha) {
+	alpha = alpha ? alpha : 1;
+	ctx.fillStyle='rgba(0,0,0,' + alpha + ')';
+	ctx.fillRect(0 - margin, 0 - margin, viewport.width + marginTwice, viewport.height + marginTwice);
+	return 0;
+};
 
-	viewport.ctx.scale(viewport.zoom, viewport.zoom);
+
+var drawDispatch = function() {
+	clearCanvas(0.9);
+	
+	ctx.fillStyle = 'white';
+	ctx.fillText('FPS: '+ fps, 5, 10);
+	ctx.save();
+	
+	ctx.translate(viewport.Offset.x, viewport.Offset.y);
+
+	ctx.scale(viewport.zoom, viewport.zoom);
 	var viewportDimensions = viewport.getDimensions();
 
 	for (i = entities.length - 1; i >= 0; i--) {
@@ -47,17 +55,17 @@ var drawDispatch = function() {
 			intBetween(entities[i].pos.x * viewport.zoom, viewportDimensions.l, viewportDimensions.r) &&
 			intBetween(entities[i].pos.y * viewport.zoom, viewportDimensions.t, viewportDimensions.b)
 		) {
-			entities[i].draw(viewport.ctx);
+			entities[i].draw(ctx);
 		}
 	}
 
-	viewport.ctx.restore();
+	ctx.restore();
 
 	return 0;
 };
 
 
-function resizeCanvas(can) {
+function resizeCanvas() {
 	if(can.width != can.clientWidth) {
 		can.width = can.clientWidth;
 		viewport.width = can.clientWidth;
@@ -70,7 +78,7 @@ function resizeCanvas(can) {
 
 
 function tickGame() {	
-	resizeCanvas(viewport.can);
+	resizeCanvas();
 	handleKeys();
 	updateEntities();
 	viewport.setZoom(player.vel.magnitude() / 25);

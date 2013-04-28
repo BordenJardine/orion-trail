@@ -9,18 +9,18 @@ var vectorPaths = {
 };
 
 var Drawable = function(attr){
+	angle = 0;
+	color = 'lightblue';
+	h = 8;
+	w = 8;
+	halfH = 4;
+	halfW = 4;
 	this.pos = new Vector2(0,0);
-	this.angle = 0;
-	this.h = 8;
-	this.w = 8;
-	this.halfH = 4;
-	this.halfW = 4;
 	this.vel = new Vector2(0,0);
-	this.color = 'lightblue';
 
 	this.draw = function(ctx){
-		ctx.fillStyle = this.color;
-		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
+		ctx.fillStyle = color;
+		ctx.fillRect(this.pos.x - halfW, this.pos.y - halfH, w, h);
 
 		ctx.fillStyle = 'white';
 		ctx.fillText(this.pos.x + ', ' + this.pos.y, this.pos.x, this.pos.y);
@@ -37,38 +37,38 @@ var Drawable = function(attr){
 	if(typeof this.init == 'function') this.init()
 };
 
-var makeDrawable = function(object) {
+var makeDrawable = function(object, attr) {
     object.prototype = new Drawable();
     return new object();
 };
 
 var Player = function(attr) {
-	this.name = 'player'
-	this.h = 11
-	this.w = 11
-	this.accel = .25
-	this.braking = .10
-	this.handling = .25
-	this.rotationalVel = 0
-	this.rotationalSpeedLimit =  5
+	accel = .25
+	braking = .10
+	handling = .25
+	h = 11
+	w = 11
+	rotationalVel = 0
+	rotationalSpeedLimit =  5
+	speedLimit = 15
+	vectorPath = vectorPaths.player
 	this.goingForth = 0
 	this.goingBack = 0
+	this.name = 'player'
 	this.rotatingLeft = 0
 	this.rotatingRight = 0
-	this.speedLimit = 15
-	this.vectorPath = vectorPaths.player
 
 	this.draw = function(ctx){
 		ctx.save();
 		ctx.translate(this.pos.x, this.pos.y);
-		ctx.rotate(this.angle * TO_RADIANS);
+		ctx.rotate(angle * TO_RADIANS);
 		ctx.strokeStyle = 'white';
 		ctx.beginPath();
-		for(p=0; p<this.vectorPath.length; p++){
-			if(this.vectorPath[p][0] == 0){
-				ctx.moveTo(this.vectorPath[p][1], this.vectorPath[p][2]);
+		for(p=0; p<vectorPath.length; p++){
+			if(vectorPath[p][0] == 0){
+				ctx.moveTo(vectorPath[p][1], vectorPath[p][2]);
 			}else{
-				ctx.lineTo(this.vectorPath[p][1], this.vectorPath[p][2]);
+				ctx.lineTo(vectorPath[p][1], vectorPath[p][2]);
 			}
 		}
 		ctx.stroke();				
@@ -76,41 +76,37 @@ var Player = function(attr) {
 		ctx.restore();
 	};
 
-	this.init = function() {
-		//this.sprite.src = this.spriteSrc;
-		alert('init called');
-	};
 
 	this.update = function() {
 		this.vel.multiplyEq(0.99);
-		this.rotationalVel *= .95;
-		var rads = this.angle * TO_RADIANS;
+		rotationalVel *= .95;
+		var rads = angle * TO_RADIANS;
 		if(this.goingForth == true) {
-			if(this.vel.isMagLessThan(this.speedLimit)) { 
-				this.vel.x+= Math.sin(rads) * this.accel;
-				this.vel.y-= Math.cos(rads) * this.accel;
+			if(this.vel.isMagLessThan(speedLimit)) { 
+				this.vel.x+= Math.sin(rads) * accel;
+				this.vel.y-= Math.cos(rads) * accel;
 			}
 		} else if(this.goingBack == true) {
-			if(this.vel.isMagLessThan(this.speedLimit)) { 
-				this.vel.x-= Math.sin(rads) * this.braking;
-				this.vel.y+= Math.cos(rads) * this.braking;
+			if(this.vel.isMagLessThan(speedLimit)) { 
+				this.vel.x-= Math.sin(rads) * braking;
+				this.vel.y+= Math.cos(rads) * braking;
 			}
 		}
 		if(this.rotatingLeft == true) {
-			if(this.rotationalVel > -this.rotationalSpeedLimit) {
-				this.rotationalVel -= this.handling;
+			if(rotationalVel > -rotationalSpeedLimit) {
+				rotationalVel -= handling;
 			}
 		} else if(this.rotatingRight == true) {
-			if(this.rotationalVel < this.rotationalSpeedLimit) {
-				this.rotationalVel += this.handling;
+			if(rotationalVel < rotationalSpeedLimit) {
+				rotationalVel += handling;
 			}					
 		}
 		
-		this.angle += this.rotationalVel;
-		if(this.angle < 0) {
-			this.angle += 360;
-		} else if(this.angle >= 360) {
-			this.angle -= 360;
+		angle += rotationalVel;
+		if(angle < 0) {
+			angle += 360;
+		} else if(angle >= 360) {
+			angle -= 360;
 		}
 		this.pos.plusEq(this.vel);
 	};
