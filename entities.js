@@ -1,10 +1,10 @@
 var vectorPaths = {
 	'player' : [
-		[0,0,-6],
-		[1,-6,6],
-		[1,0,3],
-		[1,6,6],
-		[1,0,-6]
+		['m', 0, -6],
+		['l', -6, 6],
+		['l', 0, 3],
+		['l', 6, 6],
+		['c'],
 	]
 };
 
@@ -68,13 +68,12 @@ var Player = function(attr) {
 		this.rotationalVel = 0,
 		this.rotationalSpeedLimit = 5,
 		this.speedLimit = 15,
-		this.vectorPath = vectorPaths.player;
-		this.goingForth = 0;
-		this.goingBack = 0;
-		this.name = 'player';
-		this.rotatingLeft = 0;
-	this.rotatingRight = 0;
-
+		this.vectorPath = vectorPaths.player,
+		this.goingForth = 0,
+		this.goingBack = 0,
+		this.name = 'player',
+		this.rotatingLeft = 0,
+		this.rotatingRight = 0;
 
 	this.draw = function(ctx){
 		ctx.save();
@@ -82,11 +81,20 @@ var Player = function(attr) {
 		ctx.rotate(this.angle * TO_RADIANS);
 		ctx.strokeStyle = this.color;
 		ctx.beginPath();
-		for(var p=0; p<this.vectorPath.length; p++){
-			if(this.vectorPath[p][0] == 0){
-				ctx.moveTo(this.vectorPath[p][1], this.vectorPath[p][2]);
-			}else{
-				ctx.lineTo(this.vectorPath[p][1], this.vectorPath[p][2]);
+		for(var i = 0; i < this.vectorPath.length; i++){
+			switch (this.vectorPath[i][0]) {
+			case 'm':
+				ctx.moveTo(this.vectorPath[i][1], this.vectorPath[i][2]);
+				break;
+			case 'l':
+				ctx.lineTo(this.vectorPath[i][1], this.vectorPath[i][2]);
+				break;
+			case 'c':
+				ctx.closePath();
+				break;
+			case 'f':
+				ctx.fill();
+				break;
 			}
 		}
 		ctx.stroke();				

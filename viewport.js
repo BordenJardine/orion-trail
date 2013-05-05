@@ -6,6 +6,7 @@ var Viewport = function() {
 		marginTwice = margin*2,
 		width = 0,
 		height = 0;
+
 	this.Offset = new Vector2(0,0);
 	this.zoom = 1;
 
@@ -13,6 +14,7 @@ var Viewport = function() {
 		this.Offset.x = -position.x * this.zoom + width / 2;
 		this.Offset.y = -position.y * this.zoom + height / 2;
 	};
+
 
 	this.getDimensions = function() {
 		l = -this.Offset.x - margin;
@@ -40,12 +42,10 @@ var Viewport = function() {
 
 	this.zoomIn = function() {
 		baseZoom = (baseZoom < maxZoom) ? baseZoom + .01 : maxZoom;
-		console.log(baseZoom);
 	};
 
 
-	this.zoomOut = function(){
+	this.zoomOut = function() {
 		baseZoom = (baseZoom > minZoom) ? baseZoom - .01 : minZoom;
-		console.log(baseZoom);
 	};
 };

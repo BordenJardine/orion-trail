@@ -68,7 +68,7 @@ function tickGame() {
 
 
 function updateEntities() {
-	for (i = entities.length - 1; i >= 0; i--) {
+	for (var i = entities.length - 1; i >= 0; i--) {
 		if(entities[i].update != undefined && typeof entities[i].update == 'function') {entities[i].update();}
 	}
 
