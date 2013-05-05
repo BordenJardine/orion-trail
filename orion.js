@@ -12,6 +12,7 @@ var fps = 0;
 
 var lastFPSDraw = Date.now();
 var lastUpdate = Date.now();
+
 function animationLoop() {
 	var now = Date.now();
 	var elapsedMils = now - lastUpdate;
@@ -31,7 +32,7 @@ function animationLoop() {
 
 
 var drawDispatch = function() {
-	can.clearCanvas(0.9);
+	can.clear(0.9);
 	
 	can.drawFPS(fps);
 	
@@ -56,7 +57,7 @@ var drawDispatch = function() {
 
 
 function tickGame() {	
-	can.resizeCanvas(viewport);
+	viewport.resize(can.resize());
 	handleKeys();
 	updateEntities();
 	viewport.setZoom(player.vel.magnitude() / 25);
@@ -77,8 +78,8 @@ function updateEntities() {
 
 $(function() {
 	var $can = $('#canvas');
-	can = new orionCanvas($can[0]);
 	$can.attr('tabindex', 1);
+	can = new orionCanvas($can[0]);
 	viewport = new Viewport();
 	entities = generateEntities();
 	player = entities[0];

@@ -105,7 +105,7 @@ var Player = function(attr) {
 				this.vel.y-= Math.cos(rads) * this.accel;
 			}
 		} else if(this.goingBack == true) {
-			if(this.vel.isMagLessThan(speedLimit)) { 
+			if(this.vel.isMagLessThan(this.speedLimit)) { 
 				this.vel.x-= Math.sin(rads) * this.braking;
 				this.vel.y+= Math.cos(rads) * this.braking;
 			}
