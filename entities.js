@@ -42,6 +42,9 @@ var Buoy = function() {
 	};
 };
 
+var Star = function(){
+}
+
 
 var makeDrawable = function(object, attr) {
 	object.prototype = new Drawable();
@@ -156,4 +159,9 @@ function generateEntities() {
 		makeDrawable(Buoy, {'pos' : new Vector2(-30,-70)}),
 		makeDrawable(Buoy, {'pos' : new Vector2(650,57)})
 	];
+}
+
+function generateStar(width, height) {
+	return makeDrawable(Star, {'pos' : new Vector2(Math.floor(Math.random()*width),Math.floor(Math.random()*height))})
+
 }
