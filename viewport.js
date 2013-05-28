@@ -8,6 +8,7 @@ var Viewport = function() {
 		height = 0;
 
 	this.Offset = new Vector2(0,0);
+	this.vel = new Vector2(0,0);
 	this.zoom = 1;
 
 	this.centerOn = function(position) {
@@ -17,13 +18,31 @@ var Viewport = function() {
 
 
 	this.getDimensions = function() {
-		l = -this.Offset.x - margin;
-		t = -this.Offset.y - margin;
+		
+		/*
+		var l = -this.Offset.x - margin,
+			t = -this.Offset.y - margin;
 		return {
 			'l' : l,
 			't' : t,
 			'r' : l + width + marginTwice,
-			'b' : t + height + marginTwice
+			'b' : t + height + marginTwice,
+			'w' : width + marginTwice,
+			'h' : height + marginTwice,
+			'z' : this.zoom
+		}
+		*/
+		
+		var l = -this.Offset.x,
+			t = -this.Offset.y;
+		return {
+			'l' : l,
+			't' : t,
+			'r' : l + width,
+			'b' : t + height,
+			'w' : width,
+			'h' : height,
+			'z' : this.zoom
 		}
 	};
 

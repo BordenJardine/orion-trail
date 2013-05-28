@@ -11,8 +11,8 @@ var vectorPaths = {
 var Drawable = function() {
 	this.angle = 0,
 		this.color = 'white',
-		this.h = 2,
-		this.w = 2,
+		this.h = 1,
+		this.w = 1,
 		this.halfH = 1,
 		this.halfW = 1,
 		this.pos = new Vector2(0,0),
@@ -42,7 +42,25 @@ var Buoy = function() {
 	};
 };
 
-var Star = function(){
+var Star = function() {
+	this.update = function(d) {
+		this.pos.minusEq(viewport.vel.divideNew(this.distance));
+		if(this.pos.x < d.l) {
+			this.pos.x = d.r;
+			this.pos.y = d.t + (Math.random() * d.h);
+		} else if(this.pos.x > d.r) {
+			this.pos.x = d.l;
+			this.pos.y = d.t + (Math.random() * d.h);
+		};
+
+		if(this.pos.y < d.t) { 
+			this.pos.y = d.b;
+			this.pos.x = d.l + (Math.random() * d.w);
+		} else if(this.pos.y > d.b) {
+			this.pos.y = d.t;
+			this.pos.x = d.l + (Math.random() * d.w);
+		};
+	};
 }
 
 
@@ -78,7 +96,7 @@ var Player = function(attr) {
 		this.rotatingLeft = 0,
 		this.rotatingRight = 0;
 
-	this.draw = function(ctx){
+	this.draw = function(ctx) {
 		ctx.save();
 		ctx.translate(this.pos.x, this.pos.y);
 		ctx.rotate(this.angle * TO_RADIANS);
@@ -142,7 +160,7 @@ var Player = function(attr) {
 };
 
 
-function generateEntities() {
+function generateDrawables() {
 	return [
 		makeDrawable(Player), 
 		makeDrawable(Buoy, {'name' : 'origin', 'color' : 'black', 'h' : 2, 'w': 2, 'halfH' : 1, 'halfW' : 1}),
@@ -161,7 +179,24 @@ function generateEntities() {
 	];
 }
 
-function generateStar(width, height) {
-	return makeDrawable(Star, {'pos' : new Vector2(Math.floor(Math.random()*width),Math.floor(Math.random()*height))})
+function generateStars(count, width, height) {
+	var stars = [];
+	for (var i = count; count > 0; count--) {
+		stars.push(makeStar(width, height));
+	}
+	return stars;
+}
 
+function makeStar(width, height) {
+	var distance = rand(5, 8);
+	function color() {return randInt(155, rand(0, 500) / distance)};
+
+	return makeDrawable(Star, {
+			'pos' : new Vector2(
+				Math.floor(Math.random() * width),
+				Math.floor(Math.random() * height)
+			),
+			'distance' : distance,
+			'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')'
+		})
 }

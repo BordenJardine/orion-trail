@@ -165,7 +165,8 @@ function updatePlayer() {
 
 function updateShips() { 
 	
-	for(var i=0; i<ships.length; i++) {
+//	for(var i=0; i<ships.length; i++) {
+	for(var i=0; i<2; i++) {
 	
 		var p = ships[i]; 
 		
@@ -379,8 +380,8 @@ function drawStars() {
 	for(var i=0;i<stars.length;i++) { 
 		var star = stars[i]; 
 
-//		star.x -= viewVel.x/star.s; 
-//		star.y -= viewVel.y/star.s; 
+		//star.x -= viewVel.x/star.s; 
+		//star.y -= viewVel.y/star.s; 
 		var posx = star.x; 
 		var posy = star.y; 
 
@@ -421,13 +422,14 @@ function newShip() {
 		makeShip(); 
 		
 	}
-	if(numPlayers<random(1500,2000)) { 
-		setTimeout(newShip, 1);
-		numPlayers+=randomInteger(1,5);
+	if(numPlayers<random(0,0)) { 
+	//if(numPlayers<random(1500,2000)) { 
+		//setTimeout(newShip, 1);
+		i//numPlayers+=randomInteger(1,5);
 			
 	} else { 
-		setTimeout(newShip, random(10,1000));
-		numPlayers+=randomInteger(-1,1);
+		//shetTimeout(newShip, random(10,1000));
+		//numPlayers+=randomInteger(-1,1);
 	}
 
 	 
@@ -482,7 +484,7 @@ function Particle() {
 		} else {
 			
 		//	vel.multiplyEq(0.99); 
-			pos.plusEq(vel); 
+			if (this == player) pos.plusEq(vel); 
 		
 			if(this.invincibleCountdown>0) this.invincibleCountdown--; 
 		
@@ -492,6 +494,7 @@ function Particle() {
 			pos.y = pos.y%gameHeight;
 			
 			if(this!=player) {
+				/*
 				if((killMode) && (this.pos.isCloseTo(player.pos, 200))) { 
 					diff.copyFrom(player.pos); 
 					diff.minusEq(this.pos); 
@@ -499,6 +502,7 @@ function Particle() {
 				} else { 
 					this.targetAngle = Math.atan2(vel.y, vel.x);
 				}
+				*/
 			}
 			
 		    if (this.targetAngle > this.angle+Math.PI) this.targetAngle -= Math.PI*2;

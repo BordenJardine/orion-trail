@@ -16,6 +16,18 @@ var orionCanvas  = function(canvas) {
 	};
 
 
+	this.getDimensions = function() {
+		return {
+			'l' : 0,
+			't' : 0,
+			'r' : this.canvas.width,
+			'b' : this.canvas.height,
+			'w' : this.canvas.width,
+			'h' : this.canvas.height
+		}
+	}
+
+
 	this.resize = function() {
 		if(this.canvas.width != this.canvas.clientWidth ||
 		    this.canvas.height != this.canvas.clientHeight) {

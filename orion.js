@@ -1,18 +1,17 @@
-var TO_RADIANS = Math.PI / 180;
-var FRAME_RATE = 60;
-var ONE_SECOND = 1000;
-var can;
-var ctx;
-var entities;
-var player;
-var viewport;
-
-var framecounter = 0;
-var fps = 0;
+var TO_RADIANS = Math.PI / 180,
+	FRAME_RATE = 60,
+	ONE_SECOND = 1000,
+	can,
+	drawables,
+	framecounter = 0,
+	fps = 0,
+	ghosting = 0.9,
+	player,
+	stars,
+	viewport;
 
 var lastFPSDraw = Date.now();
 var lastUpdate = Date.now();
-
 function animationLoop() {
 	var now = Date.now();
 	var elapsedMils = now - lastUpdate;
@@ -31,24 +30,16 @@ function animationLoop() {
 }
 
 
-var drawDispatch = function() {
-	can.clear(0.9);
-	
-	can.drawFPS(fps);
-	
-	can.ctx.translate(viewport.Offset.x, viewport.Offset.y);
-	can.ctx.scale(viewport.zoom, viewport.zoom);
-
+var updateEntities = function() {
 	var viewportDimensions = viewport.getDimensions();
 
-	for (i = entities.length - 1; i >= 0; i--) {
-		if (
-			intBetween(entities[i].pos.x * viewport.zoom, viewportDimensions.l, viewportDimensions.r) &&
-			intBetween(entities[i].pos.y * viewport.zoom, viewportDimensions.t, viewportDimensions.b)
-		) {
-			entities[i].draw(can.ctx);
-		}
-	}
+	can.clear(ghosting);
+	can.drawFPS(fps);
+	updateStars(can.getDimensions());
+
+	can.ctx.translate(viewport.Offset.x, viewport.Offset.y);
+	can.ctx.scale(viewportDimensions.z, viewportDimensions.z);
+	updateDrawables(viewportDimensions);
 
 	can.ctx.restore();
 
@@ -56,20 +47,42 @@ var drawDispatch = function() {
 };
 
 
-function tickGame() {	
-	viewport.resize(can.resize());
-	handleKeys();
-	updateEntities();
-	viewport.setZoom(player.vel.magnitude() / 25);
-	viewport.centerOn(player.pos);
-	drawDispatch();
+function updateStars(dimensions) {
+	for(var i = stars.length - 1; i >= 0; i--) { 
+		var star = stars[i]; 
+
+		star.update(dimensions);
+		//if (i < 3) console.log(star.pos.x + " " + star.pos.y);
+		star.draw(can.ctx);
+	}
+
 	return 0;
 }
 
 
-function updateEntities() {
-	for (var i = entities.length - 1; i >= 0; i--) {
-		if(entities[i].update != undefined && typeof entities[i].update == 'function') {entities[i].update();}
+function tickGame() {	
+	viewport.resize(can.resize());
+	handleKeys();
+	viewport.setZoom(player.vel.magnitude() / 25);
+	viewport.centerOn(player.pos);
+	viewport.vel = player.vel;
+	updateEntities();
+
+	return 0;
+}
+
+
+function updateDrawables(dimensions) {
+	for (var i = drawables.length - 1; i >= 0; i--) {
+		var drawable = drawables[i];
+		if(drawable.update != undefined && typeof drawable.update == 'function') {drawable.update();}
+
+		if (
+			intBetween(drawable.pos.x * dimensions.z, dimensions.l, dimensions.r) &&
+			intBetween(drawable.pos.y * dimensions.z, dimensions.t, dimensions.b)
+		) {
+			drawable.draw(can.ctx);
+		}
 	}
 
 	return 0;
@@ -81,8 +94,9 @@ $(function() {
 	$can.attr('tabindex', 1);
 	can = new orionCanvas($can[0]);
 	viewport = new Viewport();
-	entities = generateEntities();
-	player = entities[0];
+	drawables = generateDrawables();
+	player = drawables[0];
+	stars = generateStars(200, $can.width(), $can.height());
     
 	$can.focus();
 	animationLoop();

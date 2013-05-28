@@ -36,6 +36,16 @@ function prettyPrintObj(obj){
 }
 
 
+function rand(from, to) {
+	return Math.random() * to + from
+}
+
+
+function randInt(from, to) {
+	return Math.floor(Math.random() * to) + from
+}
+
+
 function cloneObj(obj) {
 	if (null == obj || 'object' != typeof obj) return obj;
 	var copy = obj.constructor();
