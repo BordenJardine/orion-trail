@@ -37,12 +37,12 @@ function prettyPrintObj(obj){
 
 
 function rand(from, to) {
-	return Math.random() * to + from
+	return (Math.random() * (to + 1 - from)) + from
 }
 
 
 function randInt(from, to) {
-	return Math.floor(Math.random() * to) + from
+	return Math.floor(rand(from, to))
 }
 
 

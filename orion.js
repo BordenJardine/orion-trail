@@ -5,7 +5,6 @@ var TO_RADIANS = Math.PI / 180,
 	drawables,
 	framecounter = 0,
 	fps = 0,
-	ghosting = 0.9,
 	player,
 	stars,
 	viewport;
@@ -33,7 +32,7 @@ function animationLoop() {
 var updateEntities = function() {
 	var viewportDimensions = viewport.getDimensions();
 
-	can.clear(ghosting);
+	can.clear();
 	can.drawFPS(fps);
 	updateStars(can.getDimensions());
 
@@ -50,9 +49,7 @@ var updateEntities = function() {
 function updateStars(dimensions) {
 	for(var i = stars.length - 1; i >= 0; i--) { 
 		var star = stars[i]; 
-
 		star.update(dimensions);
-		//if (i < 3) console.log(star.pos.x + " " + star.pos.y);
 		star.draw(can.ctx);
 	}
 

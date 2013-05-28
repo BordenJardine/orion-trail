@@ -11,8 +11,8 @@ var vectorPaths = {
 var Drawable = function() {
 	this.angle = 0,
 		this.color = 'white',
-		this.h = 1,
-		this.w = 1,
+		this.h = 2,
+		this.w = 2,
 		this.halfH = 1,
 		this.halfW = 1,
 		this.pos = new Vector2(0,0),
@@ -61,6 +61,19 @@ var Star = function() {
 			this.pos.x = d.l + (Math.random() * d.w);
 		};
 	};
+
+	
+	/*
+	this.draw = function(ctx) {
+		ctx.beginPath();
+	    ctx.arc(this.pos.x, this.pos.y, this.distance, 0, 2 * 3.14, false);
+	    ctx.fillStyle = this.color;
+	    ctx.fill();
+		ctx.stroke();				
+	};
+	*/
+
+
 }
 
 
@@ -189,12 +202,12 @@ function generateStars(count, width, height) {
 
 function makeStar(width, height) {
 	var distance = rand(5, 8);
-	function color() {return randInt(155, rand(0, 500) / distance)};
+	function color() {return Math.floor(200 + rand(0, 275) / distance)};
 
 	return makeDrawable(Star, {
 			'pos' : new Vector2(
-				Math.floor(Math.random() * width),
-				Math.floor(Math.random() * height)
+				randInt(0, width),
+				randInt(0, height)
 			),
 			'distance' : distance,
 			'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')'

@@ -18,23 +18,9 @@ var Viewport = function() {
 
 
 	this.getDimensions = function() {
-		
-		/*
-		var l = -this.Offset.x - margin,
-			t = -this.Offset.y - margin;
-		return {
-			'l' : l,
-			't' : t,
-			'r' : l + width + marginTwice,
-			'b' : t + height + marginTwice,
-			'w' : width + marginTwice,
-			'h' : height + marginTwice,
-			'z' : this.zoom
-		}
-		*/
-		
 		var l = -this.Offset.x,
 			t = -this.Offset.y;
+			
 		return {
 			'l' : l,
 			't' : t,

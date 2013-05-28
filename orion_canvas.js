@@ -1,5 +1,6 @@
 
 var orionCanvas  = function(canvas) {
+	var ghosting = 0.9
 	this.canvas = canvas;
 	this.ctx = canvas.getContext('2d') ;
 
@@ -9,9 +10,10 @@ var orionCanvas  = function(canvas) {
 	this.canvas.addEventListener('keyup', function(e) {e.preventDefault(); keyPresses.release(e);});
 
 	this.clear = function(alpha) {
-		alpha = alpha ? alpha : 1;
+		alpha = alpha ? alpha : ghosting;
 		this.ctx.fillStyle='rgba(0,0,0,' + alpha + ')';
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+		
 		return 0;
 	};
 
