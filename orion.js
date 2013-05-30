@@ -6,6 +6,7 @@ var TO_RADIANS = Math.PI / 180,
 	framecounter = 0,
 	fps = 0,
 	player,
+	projectiles = [],
 	stars,
 	viewport;
 
@@ -47,17 +48,16 @@ var updateEntities = function() {
 
 
 function updateStars(dimensions) {
-	for(var i = stars.length - 1; i >= 0; i--) { 
-		var star = stars[i]; 
-		star.update(dimensions);
-		star.draw(can.ctx);
+	for(var i = stars.length - 1; i >= 0; i--) {
+		stars[i].update(dimensions);
+		stars[i].draw(can.ctx);
 	}
 
 	return 0;
 }
 
 
-function tickGame() {	
+function tickGame() {
 	viewport.resize(can.resize());
 	handleKeys();
 	viewport.setZoom(player.vel.magnitude() / 25);
@@ -94,7 +94,7 @@ $(function() {
 	drawables = generateDrawables();
 	player = drawables[0];
 	stars = generateStars(200, $can.width(), $can.height());
-    
+
 	$can.focus();
 	animationLoop();
 });

@@ -1,6 +1,6 @@
 
 var orionCanvas  = function(canvas) {
-	var ghosting = 0.9
+	var ghosting = 1;
 	this.canvas = canvas;
 	this.ctx = canvas.getContext('2d') ;
 
@@ -13,7 +13,7 @@ var orionCanvas  = function(canvas) {
 		alpha = alpha ? alpha : ghosting;
 		this.ctx.fillStyle='rgba(0,0,0,' + alpha + ')';
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-		
+
 		return 0;
 	};
 

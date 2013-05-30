@@ -18,11 +18,29 @@ var Drawable = function() {
 		this.pos = new Vector2(0,0),
 		this.vel = new Vector2(0,0);
 
-	this.draw = function(ctx){
+	this.draw = function(ctx) {
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
 	};
 
+	this.drawPath = function(ctx, path) {
+		for(var i = 0; i < this.vectorPath.length; i++){
+			switch (path[i][0]) {
+			case 'm':
+				ctx.moveTo(path[i][1], path[i][2]);
+				break;
+			case 'l':
+				ctx.lineTo(path[i][1], path[i][2]);
+				break;
+			case 'c':
+				ctx.closePath();
+				break;
+			case 'f':
+				ctx.fill();
+				break;
+			}
+		}
+	};
 };
 
 
@@ -42,38 +60,57 @@ var Buoy = function() {
 	};
 };
 
+
+var Bullet = function() {
+	this.color = 'white',
+		this.h = 1,
+		this.w = 1,
+		this.halfH = 0,
+		this.halfW = 0;
+
+	this.draw = function(ctx){
+		ctx.beginPath();
+		ctx.strokeStyle = this.color;
+		ctx.moveTo(this.pos.x, this.pos.y);
+		ctx.lineTo(this.w, this.h);
+	};
+};
+
+
 var Star = function() {
 	this.update = function(d) {
 		this.pos.minusEq(viewport.vel.divideNew(this.distance));
 		if(this.pos.x < d.l) {
 			this.pos.x = d.r;
-			this.pos.y = d.t + (Math.random() * d.h);
+			this.pos.y = d.t + rand(0, d.h);
 		} else if(this.pos.x > d.r) {
 			this.pos.x = d.l;
-			this.pos.y = d.t + (Math.random() * d.h);
+			this.pos.y = d.t + rand(0, d.h);
 		};
 
-		if(this.pos.y < d.t) { 
+		if(this.pos.y < d.t) {
 			this.pos.y = d.b;
-			this.pos.x = d.l + (Math.random() * d.w);
+			this.pos.x = d.l + rand(0, d.w);
 		} else if(this.pos.y > d.b) {
 			this.pos.y = d.t;
-			this.pos.x = d.l + (Math.random() * d.w);
+			this.pos.x = d.l + rand(0, d.w);
 		};
 	};
 
-	
-	/*
+
 	this.draw = function(ctx) {
 		ctx.beginPath();
-	    ctx.arc(this.pos.x, this.pos.y, this.distance, 0, 2 * 3.14, false);
+	    ctx.arc(this.pos.x, this.pos.y, this.size, 0, 2 * 3.14, false);
 	    ctx.fillStyle = this.color;
+	    ctx.strokeStyle = this.color;
 	    ctx.fill();
-		ctx.stroke();				
+		ctx.stroke();
 	};
-	*/
 
-
+	this.init = function() {
+		this.size = Math.floor(9 - this.size - this.distance);
+		this.size = (this.size > 1) ? this.size : 1;
+	}
 }
 
 
@@ -105,6 +142,8 @@ var Player = function(attr) {
 		this.vectorPath = vectorPaths.player,
 		this.goingForth = 0,
 		this.goingBack = 0,
+		this.shooting = 0,
+		this.shootTimer = 0,
 		this.name = 'player',
 		this.rotatingLeft = 0,
 		this.rotatingRight = 0;
@@ -115,39 +154,39 @@ var Player = function(attr) {
 		ctx.rotate(this.angle * TO_RADIANS);
 		ctx.strokeStyle = this.color;
 		ctx.beginPath();
-		for(var i = 0; i < this.vectorPath.length; i++){
-			switch (this.vectorPath[i][0]) {
-			case 'm':
-				ctx.moveTo(this.vectorPath[i][1], this.vectorPath[i][2]);
-				break;
-			case 'l':
-				ctx.lineTo(this.vectorPath[i][1], this.vectorPath[i][2]);
-				break;
-			case 'c':
-				ctx.closePath();
-				break;
-			case 'f':
-				ctx.fill();
-				break;
-			}
-		}
-		ctx.stroke();				
-		ctx.translate(-this.pos.x, -this.pos.y);				
+
+		this.drawPath(ctx, this.vectorPath);
+
+		ctx.stroke();
+		ctx.translate(-this.pos.x, -this.pos.y);
 		ctx.restore();
 	};
 
 
 	this.update = function() {
+		this.updateMovement();
+		this.updateActions();
+	};
+
+
+	this.updateActions = function() {
+		if(this.shooting == true && this.shootTimer === 0) {
+			projectiles.push(makeDrawable(Bullet, { 'pos' : this.pos.clone() }));
+		}
+	};
+
+
+	this.updateMovement = function() {
 		this.vel.multiplyEq(0.99);
 		this.rotationalVel *= .95;
 		var rads = this.angle * TO_RADIANS;
 		if(this.goingForth == true) {
-			if(this.vel.isMagLessThan(this.speedLimit)) { 
+			if(this.vel.isMagLessThan(this.speedLimit)) {
 				this.vel.x+= Math.sin(rads) * this.accel;
 				this.vel.y-= Math.cos(rads) * this.accel;
 			}
 		} else if(this.goingBack == true) {
-			if(this.vel.isMagLessThan(this.speedLimit)) { 
+			if(this.vel.isMagLessThan(this.speedLimit)) {
 				this.vel.x-= Math.sin(rads) * this.braking;
 				this.vel.y+= Math.cos(rads) * this.braking;
 			}
@@ -159,9 +198,9 @@ var Player = function(attr) {
 		} else if(this.rotatingRight == true) {
 			if(this.rotationalVel < this.rotationalSpeedLimit) {
 				this.rotationalVel += this.handling;
-			}					
+			}
 		}
-		
+
 		this.angle += this.rotationalVel;
 		if(this.angle < 0) {
 			this.angle += 360;
@@ -175,7 +214,7 @@ var Player = function(attr) {
 
 function generateDrawables() {
 	return [
-		makeDrawable(Player), 
+		makeDrawable(Player),
 		makeDrawable(Buoy, {'name' : 'origin', 'color' : 'black', 'h' : 2, 'w': 2, 'halfH' : 1, 'halfW' : 1}),
 		makeDrawable(Buoy, {'pos' : new Vector2(50,50)}),
 		makeDrawable(Buoy, {'pos' : new Vector2(15,22)}),
@@ -201,8 +240,8 @@ function generateStars(count, width, height) {
 }
 
 function makeStar(width, height) {
-	var distance = rand(5, 8);
-	function color() {return Math.floor(200 + rand(0, 275) / distance)};
+	var distance = rand(5, 10);
+	function color() {return Math.floor(150 + rand(0, 500) / distance)};
 
 	return makeDrawable(Star, {
 			'pos' : new Vector2(
@@ -210,6 +249,8 @@ function makeStar(width, height) {
 				randInt(0, height)
 			),
 			'distance' : distance,
-			'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')'
+			//'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')',
+			'color' : 'white',
+			'size' : randInt(1, 4)
 		})
 }

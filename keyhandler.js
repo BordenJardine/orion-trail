@@ -1,6 +1,7 @@
 var keyPresses = {
 	current : {},
 	press : function(e){
+			console.log(e.keyCode);
 			this.current[e.keyCode] = 1;
 	},
 	release : function(e){
@@ -11,8 +12,11 @@ var keyPresses = {
 
 function handleKeys() {
 	for(var key in keyPresses.current) {
-		if(!keyPresses.current.hasOwnProperty(key)) {continue};
-		switch(parseInt(key)){
+		if(!keyPresses.current.hasOwnProperty(key)) continue;
+		switch(parseInt(key)) {
+			case 32:
+				player.shooting = keyPresses.current[key];
+				break;
 			case 37:
 				player.rotatingLeft = keyPresses.current[key];
 				break;
