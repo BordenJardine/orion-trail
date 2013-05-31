@@ -111,7 +111,7 @@ var Buoy = function() {
 
 
 var Bullet = function() {
-	this.color = 'red',
+	this.color = '#F66666',
 		this.h = 1,
 		this.w = 1,
 		this.vectorPath = vectorPaths.bullet,
@@ -199,7 +199,7 @@ var makeDrawable = function(object, attr) {
 
 var Player = function(attr) {
 	this.accel = .25,
-		this.bulletSpread = 5,
+		this.bulletSpread = 10,
 		this.braking = .10,
 		this.color = 'white',
 		this.handling = .25,

@@ -11,7 +11,7 @@ var orionCanvas  = function(canvas) {
 
 	this.clear = function(alpha) {
 		alpha = alpha ? alpha : ghosting;
-		this.ctx.fillStyle='rgba(0,0,0,' + alpha + ')';
+		this.ctx.fillStyle='rgba(20,20,20,' + alpha + ')';
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		return 0;
