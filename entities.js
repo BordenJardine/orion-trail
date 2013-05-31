@@ -5,6 +5,11 @@ var vectorPaths = {
 		['l', 0, 3],
 		['l', 6, 6],
 		['c'],
+	],
+	'bullet' : [
+		['m', -2, 2],
+		['l', 0, 0],
+		['l', 2,2],
 	]
 };
 
@@ -19,8 +24,17 @@ var Drawable = function() {
 		this.vel = new Vector2(0,0);
 
 	this.draw = function(ctx) {
-		ctx.fillStyle = this.color;
-		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
+		ctx.save();
+		ctx.translate(this.pos.x, this.pos.y);
+		ctx.rotate(this.angle * TO_RADIANS);
+		ctx.strokeStyle = this.color;
+		ctx.beginPath();
+
+		this.drawPath(ctx, this.vectorPath);
+
+		ctx.stroke();
+		ctx.translate(-this.pos.x, -this.pos.y);
+		ctx.restore();
 	};
 
 	this.drawPath = function(ctx, path) {
@@ -40,6 +54,41 @@ var Drawable = function() {
 				break;
 			}
 		}
+	};
+
+
+	this.updateMovement = function() {
+		this.vel.multiplyEq(0.99);
+		this.rotationalVel *= .95;
+		var rads = this.angle * TO_RADIANS;
+		if(this.goingForth == true) {
+			if(this.vel.isMagLessThan(this.speedLimit)) {
+				this.vel.x+= Math.sin(rads) * this.accel;
+				this.vel.y-= Math.cos(rads) * this.accel;
+			}
+		} else if(this.goingBack == true) {
+			if(this.vel.isMagLessThan(this.speedLimit)) {
+				this.vel.x-= Math.sin(rads) * this.braking;
+				this.vel.y+= Math.cos(rads) * this.braking;
+			}
+		}
+		if(this.rotatingLeft == true) {
+			if(this.rotationalVel > -this.rotationalSpeedLimit) {
+				this.rotationalVel -= this.handling;
+			}
+		} else if(this.rotatingRight == true) {
+			if(this.rotationalVel < this.rotationalSpeedLimit) {
+				this.rotationalVel += this.handling;
+			}
+		}
+
+		this.angle += this.rotationalVel;
+		if(this.angle < 0) {
+			this.angle += 360;
+		} else if(this.angle >= 360) {
+			this.angle -= 360;
+		}
+		this.pos.plusEq(this.vel);
 	};
 };
 
@@ -62,22 +111,41 @@ var Buoy = function() {
 
 
 var Bullet = function() {
-	this.color = 'white',
+	this.color = 'red',
 		this.h = 1,
 		this.w = 1,
+		this.vectorPath = vectorPaths.bullet,
 		this.halfH = 0,
-		this.halfW = 0;
+		this.halfW = 0,
+		this.life = 0,
+		this.velConstant = 15;
 
+	/*
 	this.draw = function(ctx){
 		ctx.beginPath();
-		ctx.strokeStyle = this.color;
-		ctx.moveTo(this.pos.x, this.pos.y);
-		ctx.lineTo(this.w, this.h);
+	    ctx.arc(this.pos.x, this.pos.y, 1, 0, 2 * 3.14, false);
+	    ctx.fillStyle = this.color;
+	    ctx.strokeStyle = this.color;
+	    ctx.fill();
+		ctx.stroke();
 	};
+	*/
+
+	this.update = function() {
+		this.pos.plusEq(this.vel);
+	}
+
+
+	this.init = function() {
+		var rads = (this.angle - 90) * TO_RADIANS;
+		this.vel.y = Math.sin(rads) * this.velConstant;
+		this.vel.x = Math.cos(rads) * this.velConstant;
+	}
 };
 
 
 var Star = function() {
+	this.color = '#BBB';
 	this.update = function(d) {
 		this.pos.minusEq(viewport.vel.divideNew(this.distance));
 		if(this.pos.x < d.l) {
@@ -131,6 +199,7 @@ var makeDrawable = function(object, attr) {
 
 var Player = function(attr) {
 	this.accel = .25,
+		this.bulletSpread = 5,
 		this.braking = .10,
 		this.color = 'white',
 		this.handling = .25,
@@ -138,7 +207,7 @@ var Player = function(attr) {
 		this.w = 11,
 		this.rotationalVel = 0,
 		this.rotationalSpeedLimit = 5,
-		this.speedLimit = 15,
+		this.speedLimit = 10,
 		this.vectorPath = vectorPaths.player,
 		this.goingForth = 0,
 		this.goingBack = 0,
@@ -147,20 +216,6 @@ var Player = function(attr) {
 		this.name = 'player',
 		this.rotatingLeft = 0,
 		this.rotatingRight = 0;
-
-	this.draw = function(ctx) {
-		ctx.save();
-		ctx.translate(this.pos.x, this.pos.y);
-		ctx.rotate(this.angle * TO_RADIANS);
-		ctx.strokeStyle = this.color;
-		ctx.beginPath();
-
-		this.drawPath(ctx, this.vectorPath);
-
-		ctx.stroke();
-		ctx.translate(-this.pos.x, -this.pos.y);
-		ctx.restore();
-	};
 
 
 	this.update = function() {
@@ -171,44 +226,15 @@ var Player = function(attr) {
 
 	this.updateActions = function() {
 		if(this.shooting == true && this.shootTimer === 0) {
-			projectiles.push(makeDrawable(Bullet, { 'pos' : this.pos.clone() }));
+			drawables.push(makeDrawable(Bullet, {
+				'pos' : this.pos.clone(),
+				'angle' : this.angle + rand(-this.bulletSpread, this.bulletSpread),
+			}));
 		}
 	};
 
 
-	this.updateMovement = function() {
-		this.vel.multiplyEq(0.99);
-		this.rotationalVel *= .95;
-		var rads = this.angle * TO_RADIANS;
-		if(this.goingForth == true) {
-			if(this.vel.isMagLessThan(this.speedLimit)) {
-				this.vel.x+= Math.sin(rads) * this.accel;
-				this.vel.y-= Math.cos(rads) * this.accel;
-			}
-		} else if(this.goingBack == true) {
-			if(this.vel.isMagLessThan(this.speedLimit)) {
-				this.vel.x-= Math.sin(rads) * this.braking;
-				this.vel.y+= Math.cos(rads) * this.braking;
-			}
-		}
-		if(this.rotatingLeft == true) {
-			if(this.rotationalVel > -this.rotationalSpeedLimit) {
-				this.rotationalVel -= this.handling;
-			}
-		} else if(this.rotatingRight == true) {
-			if(this.rotationalVel < this.rotationalSpeedLimit) {
-				this.rotationalVel += this.handling;
-			}
-		}
 
-		this.angle += this.rotationalVel;
-		if(this.angle < 0) {
-			this.angle += 360;
-		} else if(this.angle >= 360) {
-			this.angle -= 360;
-		}
-		this.pos.plusEq(this.vel);
-	};
 };
 
 
@@ -250,7 +276,6 @@ function makeStar(width, height) {
 			),
 			'distance' : distance,
 			//'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')',
-			'color' : 'white',
 			'size' : randInt(1, 4)
 		})
 }

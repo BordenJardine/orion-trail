@@ -42,7 +42,7 @@ var orionCanvas  = function(canvas) {
 
 	this.drawFPS = function(fps){
 		this.ctx.fillStyle = 'white';
-		this.ctx.fillText('FPS: '+ fps, 5, 10);
+		this.ctx.fillText(fps, 5, 10);
 		this.ctx.save();
 	};
 };

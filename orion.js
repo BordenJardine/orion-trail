@@ -34,11 +34,12 @@ var updateEntities = function() {
 	var viewportDimensions = viewport.getDimensions();
 
 	can.clear();
-	can.drawFPS(fps);
+	can.drawFPS('FPS: ' + fps + ' O:' + drawables.length);
 	updateStars(can.getDimensions());
 
 	can.ctx.translate(viewport.Offset.x, viewport.Offset.y);
 	can.ctx.scale(viewportDimensions.z, viewportDimensions.z);
+
 	updateDrawables(viewportDimensions);
 
 	can.ctx.restore();

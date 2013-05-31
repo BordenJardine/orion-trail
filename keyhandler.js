@@ -1,7 +1,6 @@
 var keyPresses = {
 	current : {},
 	press : function(e){
-			console.log(e.keyCode);
 			this.current[e.keyCode] = 1;
 	},
 	release : function(e){
