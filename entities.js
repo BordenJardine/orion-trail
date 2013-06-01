@@ -16,6 +16,7 @@ var vectorPaths = {
 var Drawable = function() {
 	this.angle = 0,
 		this.color = 'white',
+		this.gcMe = false,
 		this.h = 2,
 		this.w = 2,
 		this.halfH = 1,
@@ -117,22 +118,14 @@ var Bullet = function() {
 		this.vectorPath = vectorPaths.bullet,
 		this.halfH = 0,
 		this.halfW = 0,
-		this.life = 0,
+		this.life = 100,
 		this.velConstant = 15;
 
-	/*
-	this.draw = function(ctx){
-		ctx.beginPath();
-	    ctx.arc(this.pos.x, this.pos.y, 1, 0, 2 * 3.14, false);
-	    ctx.fillStyle = this.color;
-	    ctx.strokeStyle = this.color;
-	    ctx.fill();
-		ctx.stroke();
-	};
-	*/
 
 	this.update = function() {
 		this.pos.plusEq(this.vel);
+		this.life--;
+		if(this.life <= 1) this.gcMe = true;
 	}
 
 

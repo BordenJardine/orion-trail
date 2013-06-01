@@ -72,6 +72,11 @@ function tickGame() {
 function updateDrawables(dimensions) {
 	for (var i = drawables.length - 1; i >= 0; i--) {
 		var drawable = drawables[i];
+		if (drawable.gcMe) {
+			drawables.splice(i, i);
+			continue;
+		}
+
 		if(drawable.update != undefined && typeof drawable.update == 'function') {drawable.update();}
 
 		if (
