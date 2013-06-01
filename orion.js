@@ -6,7 +6,6 @@ var TO_RADIANS = Math.PI / 180,
 	framecounter = 0,
 	fps = 0,
 	player,
-	projectiles = [],
 	stars,
 	viewport;
 

@@ -225,11 +225,21 @@ var Player = function(attr) {
 
 
 	this.updateActions = function() {
-		if(this.shooting == true && this.shootTimer === 0) {
-			drawables.push(makeDrawable(Bullet, {
-				'pos' : this.pos.clone(),
-				'angle' : this.angle + rand(-this.bulletSpread, this.bulletSpread),
-			}));
+		function color() {
+			return 100+randInt(0,155)
+		}
+
+		if(this.shooting == true) {
+			if(this.shootTimer === 0) {
+				drawables.push(makeDrawable(Bullet, {
+					'pos' : this.pos.clone(),
+					'angle' : this.angle + rand(-this.bulletSpread, this.bulletSpread)
+					//'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')',
+				}));
+				this.shootTimer = 3;
+			} else {
+				this.shootTimer--;
+			}
 		}
 	};
 
