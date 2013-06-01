@@ -111,7 +111,7 @@ var Buoy = function() {
 
 
 var Bullet = function() {
-	this.color = '#F66666',
+	this.color = '#F6F666',
 		this.h = 1,
 		this.w = 1,
 		this.vectorPath = vectorPaths.bullet,
