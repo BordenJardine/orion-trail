@@ -10,6 +10,22 @@ var vectorPaths = {
 		['m', -2, 2],
 		['l', 0, 0],
 		['l', 2,2],
+	],
+	'saucer' : [
+		['m', -3, -7],
+		['l', 3, -7],
+		['l', 3, -3],
+		['l', -7, -3],
+		['l', -11, 0],
+		['l', -7, 3],
+		['l', 7, 3],
+		['l', 11, 0],
+		['l', 7, -3],
+		['l', 3, -3],
+		['m', -11, 0],
+		['l', 11, 0],
+		['m', -3, -3],
+		['l', -3, -7],
 	]
 };
 
@@ -58,6 +74,11 @@ var Drawable = function() {
 	};
 
 
+	this.update = function() {
+
+	}
+
+
 	this.updateMovement = function() {
 		this.vel.multiplyEq(0.99);
 		this.rotationalVel *= .95;
@@ -101,7 +122,7 @@ var Buoy = function() {
 		this.halfH = 4,
 		this.halfW = 4;
 
-	this.draw = function(ctx){
+	this.draw = function(ctx) {
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.pos.x - this.halfW, this.pos.y - this.halfH, this.w, this.h);
 
@@ -134,6 +155,12 @@ var Bullet = function() {
 		this.vel.y = Math.sin(rads) * this.velConstant;
 		this.vel.x = Math.cos(rads) * this.velConstant;
 	}
+};
+
+
+var Saucer = function() {
+	this.color = 'white',
+		this.vectorPath = vectorPaths.saucer;
 };
 
 
@@ -206,6 +233,7 @@ var Player = function(attr) {
 		this.goingBack = 0,
 		this.shooting = 0,
 		this.shootTimer = 0,
+		this.maxShootTimer = 5,
 		this.name = 'player',
 		this.rotatingLeft = 0,
 		this.rotatingRight = 0;
@@ -229,15 +257,12 @@ var Player = function(attr) {
 					'angle' : this.angle + rand(-this.bulletSpread, this.bulletSpread)
 					//'color' : 'rgb(' + color() + ', ' + color() + ', ' + color() + ')',
 				}));
-				this.shootTimer = 3;
+				this.shootTimer = this.maxShootTimer;
 			} else {
 				this.shootTimer--;
 			}
 		}
 	};
-
-
-
 };
 
 
@@ -256,7 +281,8 @@ function generateDrawables() {
 		makeDrawable(Buoy, {'pos' : new Vector2(330,470)}),
 		makeDrawable(Buoy, {'pos' : new Vector2(230,570)}),
 		makeDrawable(Buoy, {'pos' : new Vector2(-30,-70)}),
-		makeDrawable(Buoy, {'pos' : new Vector2(650,57)})
+		makeDrawable(Buoy, {'pos' : new Vector2(650,57)}),
+		makeDrawable(Saucer, {'pos' : new Vector2(0,-30)})
 	];
 }
 
