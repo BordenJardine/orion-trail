@@ -8,7 +8,8 @@ Until then it is just a monument to all of my personal failings.
 To 'play' it open orion.html in a browser.
 
 TODO:
-	enemies
-	bullets/shooting
-	planets
-	ui
+*enemies
+*collision
+*planets
+*ui
+*fun
