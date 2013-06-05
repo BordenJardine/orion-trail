@@ -7,20 +7,20 @@ var Viewport = function() {
 		width = 0,
 		height = 0;
 
-	this.Offset = new Vector2(0,0);
+	this.offset = new Vector2(0,0);
 	this.vel = new Vector2(0,0);
 	this.zoom = 1;
 
 	this.centerOn = function(position) {
-		this.Offset.x = -position.x * this.zoom + width / 2;
-		this.Offset.y = -position.y * this.zoom + height / 2;
+		this.offset.x = -position.x * this.zoom + width / 2;
+		this.offset.y = -position.y * this.zoom + height / 2;
 	};
 
 
 	this.getDimensions = function() {
-		var l = -this.Offset.x,
-			t = -this.Offset.y;
-			
+		var l = -this.offset.x,
+			t = -this.offset.y;
+
 		return {
 			'l' : l,
 			't' : t,

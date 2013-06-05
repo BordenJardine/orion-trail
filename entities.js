@@ -7,9 +7,9 @@ var vectorPaths = {
 		['c'],
 	],
 	'bullet' : [
-		['m', -2, 2],
+		['m', -1, 2],
 		['l', 0, 0],
-		['l', 2,2],
+		['l', 1,2],
 	],
 	'saucer' : [
 		['m', -3, -7],
@@ -40,6 +40,47 @@ var Drawable = function() {
 		this.pos = new Vector2(0,0),
 		this.vel = new Vector2(0,0);
 
+	this.checkCollisions = function(ctx, drawableSlice) {
+		/*
+		if(ctx.isPointInPath(mouseX, mouseY) || ctx.isPointInStroke(mouseX, mouseY)) {
+			can.canvas.style.cursor = 'pointer';
+			this.color = 'red';
+			console.log(this.toString)
+		} else {
+			can.canvas.style.cursor = 'auto';
+			this.color = 'white';
+		}
+		*/
+
+		for (var i = drawableSlice.length - 1; i >= 0; i--) {
+			var that = drawableSlice[i];
+			var thatX = that.pos.x + viewport.offset.x;
+			var thatY = that.pos.y + viewport.offset.y;
+			if(this.checkPath(ctx, thatX, thatY) || that.checkPath(ctx, this.pos.x, this.pos.y)){
+				this.color = 'red';
+				that.color = 'red';
+				console.log(this.toString + ' ' + that.toString);
+			}
+		}
+	};
+
+	this.checkPath = function(ctx, x, y) {
+		if (typeof this.vectorPath === 'undefined') return false;
+		var result = false;
+		var rads = this.angle * TO_RADIANS;
+		ctx.save();
+		ctx.translate(this.pos.x, this.pos.y);
+		ctx.rotate(rads);
+		ctx.beginPath();
+		this.drawPath(ctx, this.vectorPath);
+		ctx.rotate(-rads);
+		ctx.translate(-this.pos.x, -this.pos.y);
+		if(ctx.isPointInPath(x, y) || ctx.isPointInStroke(x, y)) result = true;
+		ctx.restore();
+		return result;
+	}
+
+
 	this.draw = function(ctx) {
 		ctx.save();
 		ctx.translate(this.pos.x, this.pos.y);
@@ -50,9 +91,9 @@ var Drawable = function() {
 		this.drawPath(ctx, this.vectorPath);
 
 		ctx.stroke();
-		ctx.translate(-this.pos.x, -this.pos.y);
 		ctx.restore();
 	};
+
 
 	this.drawPath = function(ctx, path) {
 		for(var i = 0; i < this.vectorPath.length; i++){
@@ -74,9 +115,7 @@ var Drawable = function() {
 	};
 
 
-	this.update = function() {
-
-	}
+	this.update = function() { }
 
 
 	this.updateMovement = function() {
@@ -140,6 +179,7 @@ var Bullet = function() {
 		this.halfH = 0,
 		this.halfW = 0,
 		this.life = 100,
+		this.toString = 'bullet',
 		this.velConstant = 15;
 
 
@@ -160,6 +200,7 @@ var Bullet = function() {
 
 var Saucer = function() {
 	this.color = 'white',
+		this.toString = 'saucer',
 		this.vectorPath = vectorPaths.saucer;
 };
 
@@ -234,7 +275,7 @@ var Player = function(attr) {
 		this.shooting = 0,
 		this.shootTimer = 0,
 		this.maxShootTimer = 5,
-		this.name = 'player',
+		this.toString = 'player',
 		this.rotatingLeft = 0,
 		this.rotatingRight = 0;
 

@@ -7,7 +7,11 @@ var TO_RADIANS = Math.PI / 180,
 	fps = 0,
 	player,
 	stars,
+	mouseXY,
+	mouseX,
+	mouseY,
 	viewport;
+
 
 var lastFPSDraw = Date.now();
 var lastUpdate = Date.now();
@@ -36,7 +40,7 @@ var updateEntities = function() {
 	can.drawFPS('FPS: ' + fps + ' O:' + drawables.length);
 	updateStars(can.getDimensions());
 
-	can.ctx.translate(viewport.Offset.x, viewport.Offset.y);
+	can.ctx.translate(viewport.offset.x, viewport.offset.y);
 	can.ctx.scale(viewportDimensions.z, viewportDimensions.z);
 
 	updateDrawables(viewportDimensions);
@@ -77,7 +81,9 @@ function updateDrawables(dimensions) {
 			continue;
 		}
 
-		if(drawable.update != undefined && typeof drawable.update == 'function') {drawable.update();}
+		drawable.checkCollisions(can.ctx, drawables.slice(0, i));
+
+		if(drawable.update != undefined && typeof drawable.update == 'function') drawable.update();
 
 		if (
 			intBetween(drawable.pos.x * dimensions.z, dimensions.l, dimensions.r) &&
@@ -100,6 +106,14 @@ $(function() {
 	player = drawables[0];
 	stars = generateStars(200, $can.width(), $can.height());
 
+	$can[0].onmousemove = function (e) {
+		var canvas = e.target;
+		var context = canvas.getContext('2d');
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+	}
+
 	$can.focus();
 	animationLoop();
+
 });
